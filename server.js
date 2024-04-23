@@ -234,11 +234,7 @@ function playTrack(trackTitle) {
 
 //=======================================================================================
 
-// Load and parse SEO data
-const seo = require("./src/seo.json");
-if (seo.url === "glitch-default") {
-  seo.url = `https://${process.env.PROJECT_DOMAIN}.glitch.me`;
-}
+
 
 // Home page route
 fastify.get("/", function (request, reply) {
@@ -382,9 +378,7 @@ fastify.post("/addTrack", function (request, reply) {
       process.exit(1);
     });
 
-  return reply.view("/src/pages/index.hbs", {
-    audioSRC: "NOTHING",
-  });
+  return; // Return nothing
 });
 
 // Returns the entire trackObject
