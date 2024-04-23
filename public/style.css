@@ -1,0 +1,127 @@
+
+@import url("/Material Design/tokens.css");
+@import url("/Material Design/colors.module.css");
+@import url("/Material Design/typography.module.css");
+@import url("/Material Design/theme.light.css") (prefers-color-scheme: light);
+@import url("/Material Design/theme.dark.css") (prefers-color-scheme: dark);
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap')
+
+:root {
+  --color-bg: #005b67;
+  --color-text-main: #FFFFFF;
+  --color-primary: var(--primary-text);
+  --wrapper-height: 87vh;
+  --image-max-width: 300px;
+  --image-margin: 3rem;
+  --font-family: "HK Grotesk";
+  --font-family-header: "HK Grotesk";
+}
+
+/* Basic page style resets */
+* {
+  box-sizing: border-box;
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+  text-align:center;
+  border-radius: 30px;
+}
+[hidden] {
+  display: none !important;
+}
+
+/* Import fonts */
+@font-face {
+  font-family: Viga;
+  src: url("https://cdn.glitch.global/2cf2beee-e334-4544-8206-21ce533c4b23/Viga-Regular.ttf?v=1712380616132")
+    format("opentype");
+}
+@font-face {
+  font-family: MontserratAlt1;
+  src: url("https://cdn.glitch.global/2cf2beee-e334-4544-8206-21ce533c4b23/MontserratAlt1-Black.ttf?v=1712380769823")
+    format("opentype");
+}
+
+
+body {
+  font-family:  sans-serif;
+  background-color: var(--md-sys-color-background);
+  width: 100vw;
+  height: 100vh;
+  color: var(--md-sys-color-on-background);
+  overflow: hidden;
+      
+}
+
+
+#tuneInButton{
+      width: 100px;
+  height: 100px;
+    aspect-ratio: 1 / 1;
+    font-size: 120px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+  background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-primary);
+}
+.material-symbols-rounded {
+  font-size: 24px;
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
+}
+
+#brandWordMark {
+ font-family: "MontserratAlt1",sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 56px;
+}
+#nowPlayingUI {
+      position: absolute;
+    bottom: 20px;
+      display: flex;
+  flex-direction: column;
+    justify-content: space-between;
+  padding-left: 20px;
+    padding-right: 20px;
+  margin-top: 60px;
+    align-content: center;
+    width: calc(100% - 20px);
+    height: 170px;
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-secondary);
+}
+#trackInfoContainer {
+      display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  margin-top: 20px;
+    align-content: center;
+    width: calc(100%);
+    color: var(--md-sys-color-secondary);
+}
+#trackName {
+  font-size: 22px;
+  color: var(--md-sys-color-primary);
+    font-weight: bold;
+}
+#trackAuthor {
+  font-size: 16px;
+  font-style: italic;
+}
+#trackProgressMeter {
+  width: 100%;
+  margin-bottom: 10px;
+
+}
+progress[value]::-webkit-progress-value {
+    transition: width 3s;
+      background: var(--md-sys-color-secondary);
+
+}
