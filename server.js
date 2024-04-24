@@ -9,7 +9,13 @@ dotenv.config();
 
 // IMPORTANT - Fastly
 const fastify = require("fastify")({ logger: false });
-
+// Configure CORS with desired options
+fastify.register(require('@fastify/cors'), {
+  origin: 'https://wildflower-radio.glitch.me/',
+  methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['X-Requested-With', 'Content-Type'],
+  credentials: true // Allow cookies if needed
+});
 // Setup our static files
 fastify.register(require("@fastify/static"), {
   root: path.join(__dirname, "public"),
@@ -383,23 +389,6 @@ fastify.post("/addTrack", function (request, reply) {
 
 // Returns the entire trackObject
 fastify.get("/getTrackInfomation", function (request, reply) {
-  // CORRS FIX TEXT
-   reply.setHeader(
-    "Access-Control-Allow-Origin",
-    "https://wildflower-radio.glitch.me"
-  );
-  reply.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,CONNECT,TRACE"
-  );
-  reply.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-Content-Type-Options, Accept, X-Requested-With, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-  );
-  reply.setHeader("Access-Control-Allow-Credentials", true);
-  reply.setHeader("Access-Control-Allow-Private-Network", true);
-  //  Firefox caps this at 24 hours (86400 seconds). Chromium (starting in v76) caps at 2 hours (7200 seconds). The default value is 5 seconds.
-  reply.setHeader("Access-Control-Max-Age", 7200);
 
   return trackObject;
 });
