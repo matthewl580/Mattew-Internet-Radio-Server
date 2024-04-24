@@ -7,15 +7,7 @@ const path = require("path");
 const dotenv = require('dotenv');
 dotenv.config();
 
-// IMPORTANT - Fastly
-const fastify = require("fastify")({ logger: false });
-// Configure CORS with desired options
-fastify.register(require('@fastify/cors'), {
-  origin: 'https://wildflower-radio.glitch.me/',
-  methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['X-Requested-With', 'Content-Type'],
-  credentials: true // Allow cookies if needed
-});
+
 // Setup our static files
 fastify.register(require("@fastify/static"), {
   root: path.join(__dirname, "public"),
@@ -27,6 +19,15 @@ fastify.register(require("@fastify/view"), {
   engine: {
     handlebars: require("handlebars"), // handlebars = .hbs
   },
+});
+// IMPORTANT - Fastly
+const fastify = require("fastify")({ logger: false });
+// Configure CORS with desired options
+fastify.register(require('@fastify/cors'), {
+  origin: 'https://wildflower-radio.glitch.me/',
+  methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['X-Requested-With', 'Content-Type'],
+  credentials: true // Allow cookies if needed
 });
 // important variables
 const   getAppCheck  = require("firebase-admin/app-check");
