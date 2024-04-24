@@ -24,11 +24,12 @@ fastify.register(require("@fastify/view"), {
 
 // Configure CORS with desired options
 fastify.register(require('@fastify/cors'), {
-  origin: 'https://wildflower-radio.glitch.me/',
+  origin: 'https://wildflower-radio.glitch.me',
   methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['X-Requested-With', 'Content-Type'],
   credentials: true // Allow cookies if needed
 });
+
 // important variables
 const   getAppCheck  = require("firebase-admin/app-check");
 
