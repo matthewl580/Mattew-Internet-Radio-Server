@@ -9,14 +9,12 @@ dotenv.config();
 
 // IMPORTANT - Fastly
 const fastify = require("fastify")({ logger: false });
-// Setup our static files
-fastify.register(require("@fastify/static"), {
+fastify.register(require("@fastify/static"), { // Setup our static files
   root: path.join(__dirname, "public"),
-  prefix: "/", // optional: default '/'
+  prefix: "/",
 });
 fastify.register(require("@fastify/formbody")); // Formbody lets us parse incoming forms
-fastify.register(require("@fastify/view"), {
-  // View is a templating manager for fastify
+fastify.register(require("@fastify/view"), { // View is a templating manager for fastify
   engine: {
     handlebars: require("handlebars"), // handlebars = .hbs
   },
@@ -24,7 +22,7 @@ fastify.register(require("@fastify/view"), {
 
 // Configure CORS with desired options
 fastify.register(require('@fastify/cors'), {
-  origin: 'https://wildflower-radio.glitch.me',
+    origin: 'https://matthew-radio.glitch.me',
   methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['X-Requested-With', 'Content-Type'],
   credentials: true // Allow cookies if needed
