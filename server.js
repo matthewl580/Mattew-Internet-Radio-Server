@@ -22,7 +22,7 @@ fastify.register(require("@fastify/view"), { // View is a templating manager for
 
 // Configure CORS with desired options
 fastify.register(require('@fastify/cors'), {
-    origin: 'matthew-radio.glitch.me',
+    origin: 'https://matthew-radio.glitch.me',
   methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['X-Requested-With', 'Content-Type'],
   credentials: true // Allow cookies if needed
