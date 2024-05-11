@@ -242,23 +242,30 @@ function playTrack(trackTitle) {
 
 
 
-// Home page route
-fastify.get("/", function (request, reply) {
-  // The Handlebars code will be able to access the parameter values and build them into the page
-  return reply.view("/src/pages/index.hbs", { seo: seo });
-});
-// Admin page rout
-fastify.get("/admin", function (request, reply) {
-  // SEND DATA
-  return reply.view("/src/pages/admin.hbs", { seo: seo });
-});
-
 /*
 Admin only
 Accesses a request from admin.hbs, downloads the mp3, splits it, and uploads it to Storage
 */
+fastify.post("/getAdminInfo", function (request, reply) {
+    if (request.body.authPassword !== "password") {
+        return; // incorrect password
+    }
+    return {
+        apiKey: "AIzaSyDb1QamdgLbPwmf5vT5_f76q65Qe9gvSjk",
+        authDomain: "matthew-internet-radio.firebaseapp.com",
+        projectId: "matthew-internet-radio",
+        storageBucket: "matthew-internet-radio.appspot.com",
+        messagingSenderId: "G-255690604474",
+        appId: "1:255690604474:web:734de292b72a8a20b0a783",
+        measurementId: "G-PNTKZ9HR35"
+    };
+}
 fastify.post("/addTrack", function (request, reply) {
-  var trackChunkDurationArray = [];
+    if (request.body.authPassword !== "password") {
+        return; // incorrect password
+    }
+    var trackChunkDurationArray = [];
+
   function uploadTrackRefToDatabase(
     request,
     trackChunkDurationArray,
@@ -266,7 +273,7 @@ fastify.post("/addTrack", function (request, reply) {
   ) {
     setDatabaseFile("Tracks", request.body.title, {
       storageReferenceURL: `Tracks/${request.body.title}`,
-      title: request.body.title,
+        title: request.body.title,
       author: request.body.author,
       duration: request.body.duration,
       chunksDuration: trackChunkDurationArray,
@@ -288,7 +295,7 @@ fastify.post("/addTrack", function (request, reply) {
       // Upload the file to Firebase Storage
       const uploadTask = storageRef
         .upload(filePath, {
-          destination: destination, //`dir/poopoo.mp3`,
+          destination: destination, 
           uploadType: "media",
           metadata: {
             contentType: "audio/mpeg",
