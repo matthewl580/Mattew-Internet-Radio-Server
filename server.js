@@ -259,7 +259,7 @@ fastify.post("/getAdminInfo", function (request, reply) {
         appId: "1:255690604474:web:734de292b72a8a20b0a783",
         measurementId: "G-PNTKZ9HR35"
     };
-}
+})
 fastify.post("/addTrack", function (request, reply) {
     if (request.body.authPassword !== "password") {
         return; // incorrect password
