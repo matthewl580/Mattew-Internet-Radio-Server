@@ -22,7 +22,7 @@ fastify.register(require("@fastify/view"), { // View is a templating manager for
 
 // Configure CORS with desired options
 fastify.register(require('@fastify/cors'), {
-    origin: '*', //https://matthew-radio.glitch.me
+    origin: 'https://matthew-radio.glitch.me',
   methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['X-Requested-With', 'Content-Type'],
   credentials: true // Allow cookies if needed
@@ -250,6 +250,8 @@ fastify.post("/getAdminInfo", function (request, reply) {
     if (request.body.authPassword !== "password") {
         return; // incorrect password
     }
+    reply.header("Access-Control-Allow-Origin", "*");
+  reply.header("Access-Control-Allow-Methods", "POST");
     return {
         apiKey: "AIzaSyDb1QamdgLbPwmf5vT5_f76q65Qe9gvSjk",
         authDomain: "matthew-internet-radio.firebaseapp.com",
@@ -262,9 +264,12 @@ fastify.post("/getAdminInfo", function (request, reply) {
 })
 
 fastify.post("/addTrack", function (request, reply) {
+  
     if (request.body.authPassword !== "password") {
         return; // incorrect password
     }
+    reply.header("Access-Control-Allow-Origin", "*");
+  reply.header("Access-Control-Allow-Methods", "POST");
     var trackChunkDurationArray = [];
 
   function uploadTrackRefToDatabase(
