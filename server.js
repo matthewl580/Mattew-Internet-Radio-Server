@@ -279,6 +279,7 @@ fastify.post("/addTrack", function (request, reply) {
     trackChunkDurationArray,
     numChunks
   ) {
+      console.log("trying to upload")
     setDatabaseFile("Tracks", request.body.title, {
       storageReferenceURL: `Tracks/${request.body.title}`,
         title: request.body.title,
@@ -394,7 +395,7 @@ fastify.post("/addTrack", function (request, reply) {
                 );
                 //attemtpt 2
                 console.log("attempt 2 to upload")
-                uploadTrackRefToDatabase(request, trackChunkDurationArray, numChunks);
+                uploadTrackRefToDatabase(request, trackChunkDurationArray, trackChunkDurationArray.length);
             }
           );
           console.log(`Chunk ${currentChunk - 1} saved to: ${chunkFilename}`);
