@@ -118,6 +118,7 @@ async function deleteStorageFile(filePath, callback = () => {}) {
 }
 
 const db = getFirestore();
+console.log(`db is: ${db}`);
 
 function getDatabaseFile(collection, fileName, func = () => {}) {
   db.collection(collection)
@@ -129,6 +130,7 @@ function getDatabaseFile(collection, fileName, func = () => {}) {
     });
 }
 function setDatabaseFile(collection, fileName, data) {
+    console.log(`setting ${collection}/${fileName} with: \n ${data}`)
   db.collection(collection).doc(fileName).set(data);
 }
 //============================================================= START OF ACTUAL CODE
@@ -389,7 +391,10 @@ fastify.post("/addTrack", function (request, reply) {
               deleteStorageFile(
                 "Tracks/FreshlyUploadedMP3File",
                 console.log("file Deleted")
-              );
+                );
+                //attemtpt 2
+                console.log("attempt 2 to upload")
+                uploadTrackRefToDatabase(request, trackChunkDurationArray, numChunks);
             }
           );
           console.log(`Chunk ${currentChunk - 1} saved to: ${chunkFilename}`);
