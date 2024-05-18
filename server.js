@@ -352,7 +352,10 @@ fastify.post("/addTrack", function (request, reply) {
                 // console.log(data);
                   trackChunkDurationArray[trackChunkDurationArray.length] = data;
                   console.log("uploading track data to IB database");
-                setDatabaseFile("Tracks", request.body.title, {
+                  //uploading track data to IB database
+                  uploadTrackRefToDatabase(request, trackChunkDurationArray, numChunks);
+                /*
+                 * setDatabaseFile("Tracks", request.body.title, {
                   storageReferenceURL: `Tracks/${request.body.title}`,
                   title: request.body.title,
                   author: request.body.author,
@@ -360,6 +363,7 @@ fastify.post("/addTrack", function (request, reply) {
                   chunksDuration: trackChunkDurationArray,
                   numChunks: currentChunk - 1,
                 });
+         */
                 fs.unlinkSync(chunkFilename);
               });
             }
