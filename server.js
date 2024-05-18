@@ -319,7 +319,7 @@ fastify.post("/addTrack", function (request, reply) {
   }
   const chunkSize = 1 * 1024 * 1024; // 1 MB chunks
   const outputDir = "chunks"; // The output directory
-
+    var chunkMediaDurationArray = [];
   if (!request.body.downloadURL) {
     console.error("Please provide a valid MP3 URL as an argument.");
     process.exit(1);
@@ -354,6 +354,7 @@ fastify.post("/addTrack", function (request, reply) {
               const duration = mp3Duration(chunkFilename).then((data) => {
                 // console.log(data);
                   trackChunkDurationArray[trackChunkDurationArray.length] = data;
+                  chunkMediaDurationArray.push(data);
                   console.log("uploading track data to IB database");
                   //uploading track data to IB database
                  // uploadTrackRefToDatabase(request, trackChunkDurationArray, numChunks);
@@ -380,7 +381,8 @@ fastify.post("/addTrack", function (request, reply) {
         if (chunkData.length > 0) {
           const chunkFilename = `chunks/chunk-${currentChunk++}.mp3`;
           const duration = mp3Duration(chunkFilename).then((data) => {
-            trackChunkDurationArray[trackChunkDurationArray.length] = data;
+              trackChunkDurationArray[trackChunkDurationArray.length] = data;
+              chunkMediaDurationArray.push(data);
           });
           fs.writeFileSync(chunkFilename, chunkData);
           uploadMP3ToFirebase(
@@ -395,7 +397,7 @@ fastify.post("/addTrack", function (request, reply) {
                 );
                 //attemtpt 2
                 console.log("attempt 2 to upload")
-                uploadTrackRefToDatabase(request, trackChunkDurationArray, trackChunkDurationArray.length);
+                uploadTrackRefToDatabase(request, chunkMediaDurationArray, chunkMediaDurationArray.length);
             }
           );
           console.log(`Chunk ${currentChunk - 1} saved to: ${chunkFilename}`);
