@@ -347,10 +347,11 @@ fastify.post("/addTrack", function (request, reply) {
             chunkFilename,
             `Tracks/${request.body.title}/Chunk_${currentChunk - 1}.mp3`,
             (data) => {
-              // duration TEST
+              // access the duration of the temporary file
               const duration = mp3Duration(chunkFilename).then((data) => {
                 // console.log(data);
-                trackChunkDurationArray[trackChunkDurationArray.length] = data;
+                  trackChunkDurationArray[trackChunkDurationArray.length] = data;
+                  console.log("uploading track data to IB database");
                 setDatabaseFile("Tracks", request.body.title, {
                   storageReferenceURL: `Tracks/${request.body.title}`,
                   title: request.body.title,
