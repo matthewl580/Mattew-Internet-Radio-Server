@@ -266,10 +266,10 @@ fastify.post("/getAdminInfo", function (request, reply) {
 fastify.post("/addTrack", function (request, reply) {
   
     if (request.body.authPassword !== "password") {
-        return; // incorrect password
+       // return; // incorrect password (disabled for the sake of debugging)
     }
     reply.header("Access-Control-Allow-Origin", "*");
-  reply.header("Access-Control-Allow-Methods", "POST");
+    reply.header("Access-Control-Allow-Methods", "POST");
     var trackChunkDurationArray = [];
 
   function uploadTrackRefToDatabase(
@@ -340,8 +340,9 @@ fastify.post("/addTrack", function (request, reply) {
 
           fs.mkdirSync(outputDir, { recursive: true }); // Create output directory if needed
           const chunkFilename = `chunks/chunk-${currentChunk++}.mp3`;
-
-          fs.writeFileSync(chunkFilename, chunkBuffer);
+            console.log(`making file: chunks/chunk-${currentChunk + 1}.mp3`)
+            fs.writeFileSync(chunkFilename, chunkBuffer);
+            console.log(`writing file: chunks/chunk-${currentChunk + 1}.mp3`)
           uploadMP3ToFirebase(
             chunkFilename,
             `Tracks/${request.body.title}/Chunk_${currentChunk - 1}.mp3`,
