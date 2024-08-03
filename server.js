@@ -99,6 +99,7 @@ async function uploadStorageFile(
     .then((data) => {
       let file = data[0];
       callback(data);
+       console.log(`⬆️ | Uploading ${filePath}/${fileName} to storage`)
       return Promise.resolve(
         "https://firebasestorage.googleapis.com/v0/b/" +
           getStorage().bucket().name +
@@ -118,7 +119,6 @@ async function deleteStorageFile(filePath, callback = () => {}) {
 }
 
 const db = getFirestore();
-console.log(`db is: ${db}`);
 
 function getDatabaseFile(collection, fileName, func = () => {}) {
   db.collection(collection)
@@ -130,7 +130,7 @@ function getDatabaseFile(collection, fileName, func = () => {}) {
     });
 }
 function setDatabaseFile(collection, fileName, data) {
-    console.log(`setting ${collection}/${fileName} with: \n ${data}`)
+    console.log(`🗒️ | Setting ${collection}/${fileName} to: \n ${data}`)
   db.collection(collection).doc(fileName).set(data);
 }
 //============================================================= START OF ACTUAL CODE
@@ -151,9 +151,12 @@ var trackObject = {
     SRC: "",
   },
 };
+// A list of tracks to play
 var trackList = ["Seventeen", "Basquiat", "People Of The Eternal Sun"];
+// The index of trackList that's currently being played
 var trackNum = 0;
-start();
+// call start func here if server fails to start playing
+
 function start() {
   nextTrack();
 }
@@ -177,11 +180,13 @@ function nextTrack() {
     position: 0,
     SRC: "",
   },
-};
+}; 
+console.log(`⏭️ | Playing next track (Track #${trackNum})`)
   playTrack(trackList[trackNum]);
   trackNum++;
 }
 function playTrack(trackTitle) {
+console.log(`🎵 | Playing track: ${trackTitle}`);
       trackObject.track.numCurrentSegment = 0;
     trackObject.track.position = 0;
   // first, reterive the object from storage
@@ -206,18 +211,20 @@ function playTrack(trackTitle) {
           trackObject.track.segmentDurations[i - 1]
         );
         if (trackObject.currentSegment.duration == null || undefined) {
+        console.warn(`⚠️ | Track segment #${i} doesn't have a set duration!!`);
           trackObject.currentSegment.duration == 26; // PLACEHOLDER
         }
        
         // Play the segment
         await playSegment(trackObject.currentSegment);
       } catch (error) {
-        console.error(`Error! (fetching segment ${i}): ${error.message}`);
+        console.error(`🔥 | Failed fetching segment ${i}! : ${error.message}`);
       }
     }
   }
 
   async function playSegment(segment) {
+  console.log(`🎵 |  Playing segment #${trackObject.track.numCurrentSegment}`);
     trackObject.track.numCurrentSegment++;
      const segmentData = await getStorageFile(
           `${trackObject.track.SRC}/Chunk_${trackObject.track.numCurrentSegment}.mp3`
@@ -279,7 +286,7 @@ fastify.post("/addTrack", function (request, reply) {
     trackChunkDurationArray,
     numChunks
   ) {
-      console.log("trying to upload")
+      console.log("🔘 | Trying to upload Track Ref to Database");
     setDatabaseFile("Tracks", request.body.title, {
       storageReferenceURL: `Tracks/${request.body.title}`,
         title: request.body.title,
@@ -393,21 +400,20 @@ fastify.post("/addTrack", function (request, reply) {
               // Delete the inital mp3 file
               deleteStorageFile(
                 "Tracks/FreshlyUploadedMP3File",
-                console.log("file Deleted")
+                console.log("🚮 | Deleted source MP3 successfully")
                 );
-                //attemtpt 2
-                console.log("attempt 2 to upload")
+              
                 uploadTrackRefToDatabase(request, chunkMediaDurationArray, chunkMediaDurationArray.length);
             }
           );
-          console.log(`Chunk ${currentChunk - 1} saved to: ${chunkFilename}`);
+          console.log(`☑️ | Chunk #${currentChunk - 1} saved to: ${chunkFilename}`);
         }
 
-        console.log("MP3 splitting complete!");
+        console.log("✅ | MP3 splitting complete!");
       });
     })
     .on("error", (error) => {
-      console.error(`Error splitting MP3: ${error.message}`);
+      console.error(`‼️ | Error splitting MP3: ${error.message}`);
       process.exit(1);
     });
 
@@ -434,6 +440,7 @@ fastify.listen(
       console.error(err);
       process.exit(1);
     }
-    console.log(`Your app is listening on ${address}`);
+    console.log(`🟢 | Server starting on ${address}`);
+    start();
   }
 );
