@@ -152,7 +152,43 @@ var trackObject = {
   },
 };
 // A list of tracks to play
-var trackList = ["Seventeen", "Basquiat", "People Of The Eternal Sun"];
+var trackList = {
+  wildflower: ["Seventeen", "Basquiat", "People Of The Eternal Sun"],
+  testRadio: ["Basquiat","People Of The Eternal Sun","Seventeen"]
+}
+// Manguages the data for the various radio stations
+var RadioManager = [
+{
+  name: "Radio Wildflower",
+  trackList:  ["Seventeen", "Basquiat", "People Of The Eternal Sun"],
+  trackNum: 0,
+  trackData: {
+    trackPosition: 0,
+    segmentDurations: [],
+    numSegments: 0,
+    currentSegmentNum: 0, // the current segment duration can be found using segmentDurations[currentSegmentNum]
+    currentSegmentPosition: 0,
+    author: "",
+    title: "",
+    SRC: ""
+  }
+},{
+  name: "Test Radio",
+  trackList:  ["Basquiat","People Of The Eternal Sun","Seventeen"],
+  trackNum: 0,
+  trackData: {
+    trackPosition: 0,
+    segmentDurations: [],
+    numSegments: 0,
+    currentSegmentNum: 0, // the current segment duration can be found using segmentDurations[currentSegmentNum]
+    currentSegmentPosition: 0,
+    author: "",
+    title: "",
+    SRC: "",
+  }
+}
+
+]
 // The index of trackList that's currently being played
 var trackNum = 0;
 // call start func here if server fails to start playing
