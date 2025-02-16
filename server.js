@@ -261,7 +261,153 @@ fastify.get("/getAllSegmentPositions", function (request, reply) {
     return allSegmentPositions;
 });
 
+fastify.post("/addTrack", function (request, reply) {
+  
+  if (request.body.authPassword !== "password") {
+     // return; // incorrect password (disabled for the sake of debugging)
+  }
+  reply.header("Access-Control-Allow-Origin", "*");
+  reply.header("Access-Control-Allow-Methods", "POST");
+  var trackChunkDurationArray = [];
 
+function uploadTrackRefToDatabase(
+  request,
+  trackChunkDurationArray,
+  numChunks
+) {
+    console.log("🔘 | Trying to upload Track Ref to Database");
+  setDatabaseFile("Tracks", request.body.title, {
+    storageReferenceURL: `Tracks/${request.body.title}`,
+      title: request.body.title,
+    author: request.body.author,
+    duration: request.body.duration,
+    chunksDuration: trackChunkDurationArray,
+    numChunks: numChunks,
+  });
+}
+async function uploadMP3ToFirebase(
+  filePath,
+  destination,
+  callback = () => {}
+) {
+  try {
+    // Create a reference to the file in Firebase Storage
+    const storageRef = getStorage().bucket();
+
+    // Create a file object from the local path
+    const file = fs.readFileSync(filePath);
+
+    // Upload the file to Firebase Storage
+    const uploadTask = storageRef
+      .upload(filePath, {
+        destination: destination, 
+        uploadType: "media",
+        metadata: {
+          contentType: "audio/mpeg",
+        },
+      })
+      .then((data) => {
+        callback(data);
+      });
+  } catch (error) {
+    console.error("Error uploading MP3:", error);
+  }
+}
+const chunkSize = 1 * 1024 * 1024; // 1 MB chunks
+const outputDir = "chunks"; // The output directory
+  var chunkMediaDurationArray = [];
+if (!request.body.downloadURL) {
+  console.error("Please provide a valid MP3 URL as an argument.");
+  process.exit(1);
+}
+
+https
+  .get(request.body.downloadURL, (response) => {
+    if (response.statusCode !== 200) {
+      console.error(`Error fetching MP3 from URL: ${response.statusCode}`);
+      process.exit(1);
+    }
+
+    let currentChunk = 1;
+    let chunkData = Buffer.alloc(0);
+
+    response.on("data", (chunk) => {
+      chunkData = Buffer.concat([chunkData, chunk]);
+      while (chunkData.length >= chunkSize) {
+        const chunkBuffer = chunkData.slice(0, chunkSize);
+        chunkData = chunkData.slice(chunkSize);
+
+        fs.mkdirSync(outputDir, { recursive: true }); // Create output directory if needed
+        const chunkFilename = `chunks/chunk-${currentChunk++}.mp3`;
+          console.log(`making file: chunks/chunk-${currentChunk + 1}.mp3`)
+          fs.writeFileSync(chunkFilename, chunkBuffer);
+          console.log(`writing file: chunks/chunk-${currentChunk + 1}.mp3`)
+        uploadMP3ToFirebase(
+          chunkFilename,
+          `Tracks/${request.body.title}/Chunk_${currentChunk - 1}.mp3`,
+          (data) => {
+            // access the duration of the temporary file
+            const duration = mp3Duration(chunkFilename).then((data) => {
+              // console.log(data);
+                trackChunkDurationArray[trackChunkDurationArray.length] = data;
+                chunkMediaDurationArray.push(data);
+                console.log("uploading track data to IB database");
+                //uploading track data to IB database
+               // uploadTrackRefToDatabase(request, trackChunkDurationArray, numChunks);
+              
+               setDatabaseFile("Tracks", request.body.title, {
+                storageReferenceURL: `Tracks/${request.body.title}`,
+                title: request.body.title,
+                author: request.body.author,
+                duration: request.body.duration,
+                chunksDuration: trackChunkDurationArray,
+                numChunks: currentChunk - 1,
+              });
+       
+              fs.unlinkSync(chunkFilename);
+            });
+          }
+        );
+        console.log(`Chunk ${currentChunk - 1} saved to: ${chunkFilename}`);
+      }
+    });
+
+    response.on("end", () => {
+      // Write remaining data if any
+      if (chunkData.length > 0) {
+        const chunkFilename = `chunks/chunk-${currentChunk++}.mp3`;
+        const duration = mp3Duration(chunkFilename).then((data) => {
+            trackChunkDurationArray[trackChunkDurationArray.length] = data;
+            chunkMediaDurationArray.push(data);
+        });
+        fs.writeFileSync(chunkFilename, chunkData);
+        uploadMP3ToFirebase(
+          chunkFilename,
+          `Tracks/${request.body.title}/Chunk_${currentChunk - 1}.mp3`,
+          (data) => {
+            fs.unlinkSync(chunkFilename);
+            // Delete the inital mp3 file
+            deleteStorageFile(
+              "Tracks/FreshlyUploadedMP3File",
+              console.log("🚮 | Deleted source MP3 successfully")
+              );
+            
+              uploadTrackRefToDatabase(request, chunkMediaDurationArray, chunkMediaDurationArray.length);
+          }
+        );
+        console.log(`☑️ | Chunk #${currentChunk - 1} saved to: ${chunkFilename}`);
+      }
+
+      console.log("✅ | MP3 splitting complete!");
+    });
+  })
+  .on("error", (error) => {
+    console.error(`‼️ | Error splitting MP3: ${error.message}`);
+    process.exit(1);
+  });
+
+return; // Return nothing
+});
 // Run the server and report out to the logs
 fastify.listen(
     { port: process.env.PORT, host: "0.0.0.0" },
