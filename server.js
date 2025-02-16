@@ -148,8 +148,16 @@ var RadioManager = [
             track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
         },
     },
+    {
+      name: "Alarm Hub",
+      trackList: ["Untitled Alarm"],
+      trackNum: 0,
+      trackObject: { // Track object specific to this radio station
+          currentSegment: { duration: undefined, position: undefined, SRC: "" },
+          track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
+      },
+  },
 ];
-
 
 function start() {
     RadioManager.forEach(radio => playRadioStation(radio)); // Play all stations simultaneously
