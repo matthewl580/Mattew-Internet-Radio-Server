@@ -77,28 +77,6 @@ async function getStorageFile(file, callback = () => { }) {
     return await downloadURL;
 }
 
-async function uploadStorageFile(fileName, filePath, file, callback = () => { }) {
-    return getStorage()
-        .bucket()
-        .upload(file, {
-            destination: `<span class="math-inline">\{filePath\}\+</span>{fileName}`,
-            uploadType: "media",
-            metadata: {
-                contentType: "text",
-            },
-        })
-        .then((data) => {
-            let file = data[0];
-            callback(data);
-            console.log(`⬆️ | Uploading <span class="math-inline">\{filePath\}/</span>{fileName} to storage`)
-            return Promise.resolve(
-                "https://firebasestorage.googleapis.com/v0/b/" +
-                getStorage().bucket().name +
-                "/o/" +
-                encodeURIComponent(file.name)
-            );
-        });
-}
 
 async function deleteStorageFile(filePath, callback = () => { }) {
     return storage
@@ -123,7 +101,7 @@ function getDatabaseFile(collection, fileName, func = () => { }) {
 }
 
 function setDatabaseFile(collection, fileName, data) {
-    console.log(`🗒️ | Setting <span class="math-inline">\{collection\}/</span>{fileName} to: \n ${data}`)
+    console.log(`🗒️ | Setting /{collection}/{fileName} to: \n ${data}`)
     db.collection(collection).doc(fileName).set(data);
 }
 
@@ -132,7 +110,7 @@ function setDatabaseFile(collection, fileName, data) {
 var RadioManager = [
     {
         name: "Radio Wildflower",
-        trackList: ["Seventeen", "Basquiat", "People Of The Eternal Sun"],
+        trackList: ["Seventeen", "People Of The Eternal Sun"],
         trackNum: 0,
         trackObject: {  // Track object specific to this radio station
             currentSegment: { duration: undefined, position: undefined, SRC: "" },
@@ -140,23 +118,23 @@ var RadioManager = [
         },
     },
     {
-        name: "Test Radio",
-        trackList: ["Basquiat", "People Of The Eternal Sun", "Seventeen"],
-        trackNum: 0,
-        trackObject: { // Track object specific to this radio station
-            currentSegment: { duration: undefined, position: undefined, SRC: "" },
-            track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
-        },
-    },
-    {
       name: "Alarm Hub",
-      trackList: ["Untitled Alarm"],
+      trackList: ["Untitled Alarm","Untitled Alarm"],
       trackNum: 0,
       trackObject: { // Track object specific to this radio station
           currentSegment: { duration: undefined, position: undefined, SRC: "" },
           track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
       },
   },
+  {
+    name: "Legion Lofi",
+    trackList: ["Wings of Dawn","Call to Fly","Into the Sky","Storm on the Horizon","Engage","Systems Critical","Alone at Altitude","Into the Inferno","Defensive Maneuvers","Burning Sky","Final Descent","The Quiet Below","Eagles and Metal"],
+    trackNum: 0,
+    trackObject: { // Track object specific to this radio station
+        currentSegment: { duration: undefined, position: undefined, SRC: "" },
+        track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
+    },
+},
 ];
 
 function start() {
@@ -175,13 +153,13 @@ function playRadioStation(radioStation) {
             track: { segmentDurations: [], numSegments: 0, numCurrentSegment: 0, author: "", title: "", duration: 0, position: 0, SRC: "" },
         };
 
-        console.log(`⏭️ | Playing next track (Track #${radio.trackNum}) on ${radio.name}`);
+        console.log(`⏭️ | ${radio.name} - Playing next track (Track #${radio.trackNum})`);
         playTrack(radio, radio.trackList[radio.trackNum]);
         radio.trackNum++;
     }
 
     function playTrack(radio, trackTitle) {
-        console.log(`🎵 | Playing track: ${trackTitle} on ${radio.name}`);
+        console.log(`🎵 | ${radio.name} - Playing track: ${trackTitle}`);
         radio.trackObject.track.numCurrentSegment = 0;
         radio.trackObject.track.position = 0;
 
@@ -201,18 +179,18 @@ function playRadioStation(radioStation) {
                 try {
                     radio.trackObject.currentSegment.duration = Math.trunc(radio.trackObject.track.segmentDurations[i - 1]);
                     if (radio.trackObject.currentSegment.duration == null || undefined) {
-                        console.warn(`⚠️ | Track segment #${i} doesn't have a set duration!!`);
+                        console.warn(`⚠️ | WARN - Track segment #${i} doesn't have a set duration, using default duration`);
                         radio.trackObject.currentSegment.duration = 26; // PLACEHOLDER
                     }
                     await playSegment(radio, radio.trackObject.currentSegment);
                 } catch (error) {
-                    console.error(`🔥 | Failed fetching segment ${i}! : ${error.message}`);
+                    console.error(`🔥 | ERROR - Failed fetching segment #${i} : ${error.message}`);
                 }
             }
         }
 
         async function playSegment(radio, segment) {
-            console.log(`🎵 |  Playing segment #${radio.trackObject.track.numCurrentSegment} on ${radio.name}`);
+            console.log(`🎵 |  ${radio.name} - Playing segment #${radio.trackObject.track.numCurrentSegment} `);
             radio.trackObject.track.numCurrentSegment++;
             const segmentData = await getStorageFile(`${radio.trackObject.track.SRC}/Chunk_${radio.trackObject.track.numCurrentSegment}.mp3`);
             radio.trackObject.currentSegment.SRC = segmentData;
