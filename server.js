@@ -206,7 +206,7 @@ function playRadioStation(radioStation) {
         async function playSegment(radio, segment) {
             console.log(`🎵 |  Playing segment #${radio.trackObject.track.numCurrentSegment} on ${radio.name}`);
             radio.trackObject.track.numCurrentSegment++;
-            const segmentData = await getStorageFile(`<span class="math-inline">\{radio\.trackObject\.track\.SRC\}/Chunk\_</span>{radio.trackObject.track.numCurrentSegment}.mp3`);
+            const segmentData = await getStorageFile(`${radio.trackObject.track.SRC}/Chunk_${radio.trackObject.track.numCurrentSegment}.mp3`);
             radio.trackObject.currentSegment.SRC = segmentData;
 
             for (let position = 0; position <= segment.duration; position++) {
