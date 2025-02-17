@@ -210,7 +210,7 @@ function playRadioStation(radioStation) {
                 }
                 await new Promise((resolve) => setTimeout(resolve, 1000));
             }
-                                           await radio.trackObject.currentSegment.position = 0;
+                                            radio.trackObject.currentSegment.position = 0;
 
         }
     }
