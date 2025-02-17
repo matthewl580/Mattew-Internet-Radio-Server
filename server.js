@@ -198,16 +198,11 @@ function playRadioStation(radioStation) {
             for (let position = 0; position <= segment.duration; position++) {
               // dfrds
                 radio.trackObject.track.position++;
-                                radio.trackObject.currentSegment.position = position;
-
                 if (
-                    radio.trackObject.track.numCurrentSegment > radio.trackObject.track.numSegments &&
-                    position >= segment.duration
+                    radio.trackObject.track.numCurrentSegment >= radio.trackObject.track.numSegments || radio.trackObject.track.position >=radio.trackObject.track.duration
                 ) {
                     nextTrack(radio);
                     console.log(`Switching Tracks on ${radio.name}`);
-                    console.log("RETURNING: " + radio.name);
-                    return;
                 }
                 await new Promise((resolve) => setTimeout(resolve, 1000));
             }
