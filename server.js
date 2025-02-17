@@ -6,7 +6,7 @@ const firebase = require("firebase/app");
 const path = require("path");
 const dotenv = require('dotenv');
 dotenv.config();
- 
+  
 // IMPORTANT - Fastly
 const fastify = require("fastify")({ logger: false });
 fastify.register(require("@fastify/static"), {
