@@ -378,7 +378,7 @@ https
               console.log("🚮 | Deleted source MP3 successfully")
               );
             
-              uploadTrackRefToDatabase(request, chunkMediaDurationArray, chunkMediaDurationArray.length);
+              uploadTrackRefToDatabase(request, chunkMediaDurationArray, chunkMediaDurationArray.length-1);
           }
         );
         console.log(`☑️ | Chunk #${currentChunk - 1} saved to: ${chunkFilename}`);
