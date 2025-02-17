@@ -198,17 +198,20 @@ function playRadioStation(radioStation) {
             for (let position = 0; position <= segment.duration; position++) {
               // dfrds
                 radio.trackObject.track.position++;
-                                radio.trackObject.currentSegment.position++;
+                                radio.trackObject.currentSegment.position = position;
 
                 if (
                     radio.trackObject.track.numCurrentSegment >= radio.trackObject.track.numSegments || radio.trackObject.track.position >=radio.trackObject.track.duration
                 ) {
                     nextTrack(radio);
                     console.log(`Switching Tracks on ${radio.name}`);
-                                radio.trackObject.currentSegment.position = 0;
+                                                    radio.trackObject.currentSegment.position = 0;
+
                 }
                 await new Promise((resolve) => setTimeout(resolve, 1000));
             }
+                                           await radio.trackObject.currentSegment.position = 0;
+
         }
     }
 
