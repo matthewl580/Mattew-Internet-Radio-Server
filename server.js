@@ -199,9 +199,9 @@ function playRadioStation(radioStation) {
               // dfrds
                 radio.trackObject.track.position++;
                                 radio.trackObject.currentSegment.position = position;
-
+// NOTE REPLACE radio.trackObject.track.numCurrentSegment > radio.trackObject.track.numSegments WITH radio.trackObject.track.numCurrentSegment >= radio.trackObject.track.numSegments IF TROUBLE HAPPENS
                 if (
-                    radio.trackObject.track.numCurrentSegment >= radio.trackObject.track.numSegments || radio.trackObject.track.position >=radio.trackObject.track.duration
+                    radio.trackObject.track.numCurrentSegment > radio.trackObject.track.numSegments || radio.trackObject.track.position >=radio.trackObject.track.duration
                 ) {
                     nextTrack(radio);
                     console.log(`Switching Tracks on ${radio.name}`);
