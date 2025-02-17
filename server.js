@@ -177,7 +177,7 @@ function playRadioStation(radioStation) {
         async function playSegments(radio) {
             for (let i = 1; i < radio.trackObject.track.numSegments + 1; i++) {
                 try {
-                    radio.trackObject.currentSegment.duration = Math.trunc(radio.trackObject.track.segmentDurations[i - 1]);
+                    radio.trackObject.currentSegment.duration = Math.round(radio.trackObject.track.segmentDurations[i - 1]);
                     if (radio.trackObject.currentSegment.duration == null || undefined) {
                         console.warn(`⚠️ | WARN - Track segment #${i} doesn't have a set duration, using default duration`);
                         radio.trackObject.currentSegment.duration = 26; // PLACEHOLDER
@@ -197,14 +197,17 @@ function playRadioStation(radioStation) {
 
             for (let position = 0; position <= segment.duration; position++) {
               // dfrds
-                radio.trackObject.currentSegment.position = position;
                 radio.trackObject.track.position++;
+                                radio.trackObject.currentSegment.position = position;
+
                 if (
-                    radio.trackObject.track.numCurrentSegment == radio.trackObject.track.numSegments &&
+                    radio.trackObject.track.numCurrentSegment > radio.trackObject.track.numSegments &&
                     position >= segment.duration
                 ) {
                     nextTrack(radio);
                     console.log(`Switching Tracks on ${radio.name}`);
+                    console.log("RETURNING: " + radio.name);
+                    return;
                 }
                 await new Promise((resolve) => setTimeout(resolve, 1000));
             }
