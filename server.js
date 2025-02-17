@@ -177,7 +177,7 @@ function playRadioStation(radioStation) {
         async function playSegments(radio) {
             for (let i = 1; i < radio.trackObject.track.numSegments+1; i++) {
                 try {
-                    radio.trackObject.currentSegment.duration = Math.round(radio.trackObject.track.segmentDurations[i - 1]);
+                    radio.trackObject.currentSegment.duration = Math.trunc(radio.trackObject.track.segmentDurations[i - 1]);
                     if (radio.trackObject.currentSegment.duration == null || undefined) {
                         console.warn(`⚠️ | WARN - Track segment #${i} doesn't have a set duration, using default duration`);
                         radio.trackObject.currentSegment.duration = 26; // PLACEHOLDER
