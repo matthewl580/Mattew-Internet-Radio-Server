@@ -175,7 +175,7 @@ function playRadioStation(radioStation) {
         });
 
         async function playSegments(radio) {
-            for (let i = 1; i < radio.trackObject.track.numSegments + 1; i++) {
+            for (let i = 1; i < radio.trackObject.track.numSegments; i++) {
                 try {
                     radio.trackObject.currentSegment.duration = Math.round(radio.trackObject.track.segmentDurations[i - 1]);
                     if (radio.trackObject.currentSegment.duration == null || undefined) {
