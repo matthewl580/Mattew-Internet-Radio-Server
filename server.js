@@ -143,79 +143,96 @@ function start() {
 
 
 function playRadioStation(radioStation) {
-    function nextTrack(radio) {
-        if (radio.trackNum >= radio.trackList.length) {
-            radio.trackNum = 0;
-        }
+  let currentTrackIndex = 0; // Use an index for track management
 
-        radio.trackObject = {  // Reset track object
-            currentSegment: { duration: 0, position: 0, SRC: "" },
-            track: { segmentDurations: [], numSegments: 0, numCurrentSegment: 0, author: "", title: "", duration: 0, position: 0, SRC: "" },
-        };
+  function nextTrack(radio) {
+    currentTrackIndex = (currentTrackIndex + 1) % radio.trackList.length; // Wrap around
+    const trackTitle = radio.trackList[currentTrackIndex];
 
-        console.log(`⏭️ | ${radio.name} - Playing next track (Track #${radio.trackNum})`);
-        playTrack(radio, radio.trackList[radio.trackNum]);
-        radio.trackNum++;
+    console.log(`⏭️ | ${radio.name} - Playing next track (Track #${currentTrackIndex + 1}): ${trackTitle}`);
+
+    radio.trackObject = {  // Reset the ENTIRE trackObject
+      currentSegment: { duration: 0, position: 0, SRC: "" },
+      track: {
+        segmentDurations: [],
+        numSegments: 0,
+        numCurrentSegment: 0,
+        author: "",
+        title: "",
+        duration: 0,
+        position: 0,
+        SRC: "",
+      },
+    };
+
+    playTrack(radio, trackTitle);
+  }
+
+  async function playTrack(radio, trackTitle) {
+    console.log(`🎵 | ${radio.name} - Playing track: ${trackTitle}`);
+
+    try {
+      const trackData = await new Promise((resolve, reject) => { // Use Promise for getDatabaseFile
+        getDatabaseFile("Tracks", trackTitle, (data) => resolve(data));
+      });
+
+      radio.trackObject.track.numSegments = trackData.numChunks;
+      radio.trackObject.track.duration = trackData.duration;
+      radio.trackObject.track.title = trackData.title;
+      radio.trackObject.track.author = trackData.author;
+      radio.trackObject.track.SRC = trackData.storageReferenceURL;
+      radio.trackObject.track.segmentDurations = trackData.chunksDuration;
+
+      await playSegments(radio); // Wait for all segments to play
+      nextTrack(radio); // Go to the next track *after* playSegments completes
+    } catch (error) {
+      console.error(`🔥 | ERROR - Getting track data: ${error.message}`);
+      nextTrack(radio); // Even on error, proceed to the next track
     }
+  }
 
-    function playTrack(radio, trackTitle) {
-        console.log(`🎵 | ${radio.name} - Playing track: ${trackTitle}`);
-        radio.trackObject.track.numCurrentSegment = 0;
-        radio.trackObject.track.position = 0;
+  async function playSegments(radio) {
+    radio.trackObject.track.numCurrentSegment = 0;
+    let currentTrackPosition = 0;
 
-        getDatabaseFile("Tracks", trackTitle, (data) => {
-            radio.trackObject.track.numSegments = data.numChunks;
-            radio.trackObject.track.duration = data.duration;
-            radio.trackObject.track.title = data.title;
-            radio.trackObject.track.author = data.author;
-            radio.trackObject.track.SRC = data.storageReferenceURL;
-            radio.trackObject.track.segmentDurations = data.chunksDuration;
-            console.log(data);
-            playSegments(radio);
-        });
-
-        async function playSegments(radio) {
-            for (let i = 1; i < radio.trackObject.track.numSegments+1; i++) {
-                try {
-                    radio.trackObject.currentSegment.duration = Math.round(radio.trackObject.track.segmentDurations[i - 1]);
-                    if (radio.trackObject.currentSegment.duration == null || undefined) {
-                        console.warn(`⚠️ | WARN - Track segment #${i} doesn't have a set duration, using default duration`);
-                        radio.trackObject.currentSegment.duration = 26; // PLACEHOLDER
-                    }
-                    await playSegment(radio, radio.trackObject.currentSegment);
-                } catch (error) {
-                    console.error(`🔥 | ERROR - Failed fetching segment #${i} : ${error.message}`);
-                }
-            }
+    for (let i = 1; i <= radio.trackObject.track.numSegments; i++) {
+      try {
+        radio.trackObject.currentSegment.duration = Math.trunc(
+          radio.trackObject.track.segmentDurations[i - 1]
+        );
+        if (!radio.trackObject.currentSegment.duration) {
+          console.warn(`⚠️ | WARN - Segment #${i} duration missing.`);
+          radio.trackObject.currentSegment.duration = 26;
         }
-
-        async function playSegment(radio, segment) {
-            console.log(`🎵 |  ${radio.name} - Playing segment #${radio.trackObject.track.numCurrentSegment} `);
-            radio.trackObject.track.numCurrentSegment++;
-            const segmentData = await getStorageFile(`${radio.trackObject.track.SRC}/Chunk_${radio.trackObject.track.numCurrentSegment}.mp3`);
-            radio.trackObject.currentSegment.SRC = segmentData;
-
-            for (let position = 0; position <= segment.duration; position++) {
-              // dfrds
-                radio.trackObject.track.position++;
-                                radio.trackObject.currentSegment.position = position;
-// NOTE REPLACE radio.trackObject.track.numCurrentSegment > radio.trackObject.track.numSegments WITH radio.trackObject.track.numCurrentSegment >= radio.trackObject.track.numSegments IF TROUBLE HAPPENS
-                if (
-                    radio.trackObject.track.numCurrentSegment > radio.trackObject.track.numSegments || radio.trackObject.track.position >=radio.trackObject.track.duration
-                ) {
-                    nextTrack(radio);
-                    console.log(`Switching Tracks on ${radio.name}`);
-                                                    radio.trackObject.currentSegment.position = 0;
-
-                }
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-            }
-                                            radio.trackObject.currentSegment.position = 0;
-
-        }
+        await playSegment(radio, radio.trackObject.currentSegment, currentTrackPosition);
+        currentTrackPosition += radio.trackObject.currentSegment.duration;
+      } catch (error) {
+        console.error(`🔥 | ERROR - Playing segment #${i}: ${error.message}`);
+        // Consider if you want to skip the segment or the entire track on error
+      }
     }
+  }
 
-    nextTrack(radioStation); // Start playing the first track for this station
+  async function playSegment(radio, segment, trackPosition) {
+    // ... (same as before, but with the crucial position updates and logging)
+    console.log(`🎵 | ${radio.name} - Playing segment #${radio.trackObject.track.numCurrentSegment}`);
+      radio.trackObject.track.numCurrentSegment++;
+      const segmentData = await getStorageFile(
+        `${radio.trackObject.track.SRC}/Chunk_${radio.trackObject.track.numCurrentSegment}.mp3`
+      );
+      radio.trackObject.currentSegment.SRC = segmentData;
+      radio.trackObject.currentSegment.position = 0; // Reset segment position HERE
+
+      // Simulate playback and position tracking (REPLACE THIS WITH ACTUAL AUDIO PLAYBACK LOGIC)
+      for (let position = 0; position < segment.duration; position++) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate 1-second increments
+        radio.trackObject.currentSegment.position = position + 1;
+        radio.trackObject.track.position = trackPosition + position + 1; // Update total track position
+        console.log(`${radio.name} - Track Position: ${radio.trackObject.track.position}, Segment Position: ${radio.trackObject.currentSegment.position}`);
+      }
+  }
+
+  nextTrack(radioStation); // Start the first track
 }
 
 
