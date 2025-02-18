@@ -245,61 +245,45 @@ function playRadioStation(radioStation) {
 
 		async function playSegments(radio) {
       radio.trackObject.track.numCurrentSegment = 0;
-			for (let i = 1; i < radio.trackObject.track.numSegments + 1; i++) {
-				try {
-					radio.trackObject.currentSegment.duration = Math.trunc(
-						radio.trackObject.track.segmentDurations[i - 1]
-					);
-					if (
-						radio.trackObject.currentSegment.duration == null ||
-						undefined
-					) {
-						console.warn(
-							`⚠️ | WARN - Track segment #${i} doesn't have a set duration, using placeholder duration`
-						);
-						radio.trackObject.currentSegment.duration = 26; // PLACEHOLDER
-					}
-					await playSegment(radio, radio.trackObject.currentSegment);
-				} catch (error) {
-					console.error(
-						`🔥 | ERROR - Failed fetching segment #${i} : ${error.message}`
-					);
-				}
-			}
-		}
+      let currentTrackPosition = 0; // Keep track of overall track position
 
-		async function playSegment(radio, segment) {
-			console.log(
-				`🎵 |  ${radio.name} - Playing segment #${radio.trackObject.track.numCurrentSegment} `
-			);
-			radio.trackObject.track.numCurrentSegment++;
-			const segmentData = await getStorageFile(
-				`${radio.trackObject.track.SRC}/Chunk_${radio.trackObject.track.numCurrentSegment}.mp3`
-			);
-			radio.trackObject.currentSegment.SRC = segmentData;
+      for (let i = 1; i <= radio.trackObject.track.numSegments; i++) {
+        try {
+          radio.trackObject.currentSegment.duration = Math.trunc(
+            radio.trackObject.track.segmentDurations[i - 1]
+          );
+          if (!radio.trackObject.currentSegment.duration) { // Simplified check
+            console.warn(`⚠️ | WARN - Segment #${i} duration missing.`);
+            radio.trackObject.currentSegment.duration = 26; // PLACEHOLDER
+          }
+          await playSegment(radio, radio.trackObject.currentSegment, currentTrackPosition);
+          currentTrackPosition += radio.trackObject.currentSegment.duration; // Update total position
 
-			for (let position = 0; position <= segment.duration; position++) {
-				// dfrds
-				radio.trackObject.track.position++;
-				radio.trackObject.currentSegment.position = position;
-				// NOTE REPLACE radio.trackObject.track.numCurrentSegment > radio.trackObject.track.numSegments WITH radio.trackObject.track.numCurrentSegment >= radio.trackObject.track.numSegments IF TROUBLE HAPPENS
-				if (
-					radio.trackObject.track.numCurrentSegment >
-						radio.trackObject.track.numSegments ||
-					radio.trackObject.track.position >=
-						radio.trackObject.track.duration
-				) {
-					nextTrack(radio);
-					console.log(`Switching Tracks on ${radio.name}`);
-					radio.trackObject.currentSegment.position = 0;
-				}
-				await new Promise((resolve) => setTimeout(resolve, 1000));
-			}
-			radio.trackObject.currentSegment.position = 0;
-		}
-	}
+        } catch (error) {
+          console.error(`🔥 | ERROR - Segment #${i} fetch failed: ${error.message}`);
+        }
+      }
+      nextTrack(radio); // After all segments, go to the next track
+    }
 
-	nextTrack(radioStation); // Start playing the first track for this station
+    async function playSegment(radio, segment, trackPosition) {
+      console.log(`🎵 | ${radio.name} - Playing segment #${radio.trackObject.track.numCurrentSegment}`);
+      radio.trackObject.track.numCurrentSegment++;
+      const segmentData = await getStorageFile(
+        `${radio.trackObject.track.SRC}/Chunk_${radio.trackObject.track.numCurrentSegment}.mp3`
+      );
+      radio.trackObject.currentSegment.SRC = segmentData;
+      radio.trackObject.currentSegment.position = 0; // Reset segment position HERE
+
+      // Simulate playback and position tracking (REPLACE THIS WITH ACTUAL AUDIO PLAYBACK LOGIC)
+      for (let position = 0; position < segment.duration; position++) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate 1-second increments
+        radio.trackObject.currentSegment.position = position + 1;
+        radio.trackObject.track.position = trackPosition + position + 1; // Update total track position
+        console.log(`${radio.name} - Track Position: ${radio.trackObject.track.position}, Segment Position: ${radio.trackObject.currentSegment.position}`);
+      }
+    }
+  }
 }
 
 // ... (Admin routes remain the same)
