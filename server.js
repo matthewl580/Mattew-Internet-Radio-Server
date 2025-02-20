@@ -143,6 +143,14 @@ var RadioManager = [
         currentSegment: { duration: undefined, position: undefined, SRC: "" },
         track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
     },
+}, {
+    name: "Meet Mindseye",
+    trackList: ["Mindseye - A Vibe Nostalgic","Mindseye - Atlantic","Mindseye - Atlantic","Mindseye - Echoes","Mindseye - Feel like Home","	Mindseye - Intersteller","Mindseye - Leave the Atmosphere","Mindseye - Luminescent","Mindseye - Meliora","Mindseye - Orion","Mindseye - Stratosphere","	Mindseye - Stratosphere","Mindseye - Stratosphere"],
+    trackNum: 0,
+    trackObject: { // Track object specific to this radio station
+        currentSegment: { duration: undefined, position: undefined, SRC: "" },
+        track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
+    },
 },
 ];
 
