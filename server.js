@@ -110,7 +110,7 @@ function setDatabaseFile(collection, fileName, data) {
 var RadioManager = [
     {
         name: "Radio Wildflower",
-        trackList: ["Seventeen", "People Of The Eternal Sun"],
+        trackList: ["Inspiration","Cheeky Tuesday","Sweeping Broomstick","Call to Fly","Slow Your Role","Soul of Galveston","Sunday Reflections","The Day is Long","Seventeen", "People Of The Eternal Sun","Another Banger"],
         trackNum: 0,
         trackObject: {  // Track object specific to this radio station
             currentSegment: { duration: undefined, position: undefined, SRC: "" },
@@ -129,6 +129,14 @@ var RadioManager = [
   {
     name: "Legion Lofi",
     trackList: ["Wings of Dawn","Call to Fly","Into the Sky","Storm on the Horizon","Engage","Systems Critical","Alone at Altitude","Into the Inferno","Defensive Maneuvers","Burning Sky","Final Descent","The Quiet Below","Eagles and Metal"],
+    trackNum: 0,
+    trackObject: { // Track object specific to this radio station
+        currentSegment: { duration: undefined, position: undefined, SRC: "" },
+        track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
+    },
+       {
+    name: "Hue Jazz",
+    trackList: ["Don't Say No","Let's Hang","Sista Jane_Jazz Quartet","Slow Your Role","Soul of Galveston","Sunday Reflections","The Day is Long","The Race","Soul of Whicita","Funky Travel Middle","This Casino","It's Nice and I like It"],
     trackNum: 0,
     trackObject: { // Track object specific to this radio station
         currentSegment: { duration: undefined, position: undefined, SRC: "" },
@@ -202,7 +210,22 @@ function playRadioStation(radioStation) {
         );
         if (!radio.trackObject.currentSegment.duration) {
           console.warn(`⚠️ | WARN - Segment #${i} duration missing.`);
-          radio.trackObject.currentSegment.duration = 26;
+            // FIRST attempt, only works if this is the last chunk
+            if(radio.trackObject.numCurrentSegment >= radio.trackObject.numSegments) {
+                          radio.trackObject.currentSegment.duration = 1 + (radio.trackObject.track.duration - ( radio.trackObject.numCurrentSegment * (radio.trackObject.numSegments - 1)));
+                console.log("RECIFING with last segment duration calculations (safe)")
+            } else {
+                // so we may not be at the last segment, lets use the one before us as a placeholder
+                if (radio.trackObject.numCurrentSegment != 0) {
+                radio.trackObject.currentSegment.duration = radio.trackObject.track.segmentDurations[radio.trackObject.numCurrentSegment - 1];
+                    console.log("RECIFING using previous segment length")
+                } else {
+                    // there is nothing we can do
+                              radio.trackObject.currentSegment.duration = 28;
+                                        console.log("RECIFING FAILED. Forcing duration to be 28 seconds")
+
+                }
+            }
         }
         await playSegment(radio, radio.trackObject.currentSegment, currentTrackPosition);
         currentTrackPosition += radio.trackObject.currentSegment.duration;
