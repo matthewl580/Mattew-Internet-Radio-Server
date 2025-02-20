@@ -134,7 +134,8 @@ var RadioManager = [
         currentSegment: { duration: undefined, position: undefined, SRC: "" },
         track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
     },
-       {
+  },
+     {
     name: "Hue Jazz",
     trackList: ["Don't Say No","Let's Hang","Sista Jane_Jazz Quartet","Slow Your Role","Soul of Galveston","Sunday Reflections","The Day is Long","The Race","Soul of Whicita","Funky Travel Middle","This Casino","It's Nice and I like It"],
     trackNum: 0,
