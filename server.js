@@ -385,6 +385,14 @@ https
         const duration = mp3Duration(chunkFilename).then((data) => {
             trackChunkDurationArray[trackChunkDurationArray.length] = data;
             chunkMediaDurationArray.push(data);
+             setDatabaseFile("Tracks", request.body.title, {
+                storageReferenceURL: `Tracks/${request.body.title}`,
+                title: request.body.title,
+                author: request.body.author,
+                duration: request.body.duration,
+                chunksDuration: trackChunkDurationArray,
+                numChunks: currentChunk - 1,
+              });
         });
         fs.writeFileSync(chunkFilename, chunkData);
         uploadMP3ToFirebase(
