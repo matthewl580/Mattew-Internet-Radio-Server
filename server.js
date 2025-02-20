@@ -383,7 +383,7 @@ https
       if (chunkData.length > 0) {
         const chunkFilename = `chunks/chunk-${currentChunk++}.mp3`;
         const duration = mp3Duration(chunkFilename).then((data) => {
-            trackChunkDurationArray[trackChunkDurationArray.length] = data;
+            trackChunkDurationArray.push(data);
             chunkMediaDurationArray.push(data);
              setDatabaseFile("Tracks", request.body.title, {
                 storageReferenceURL: `Tracks/${request.body.title}`,
