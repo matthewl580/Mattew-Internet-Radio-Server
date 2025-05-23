@@ -21,7 +21,7 @@ fastify.register(require("@fastify/view"), {
 });
 
 fastify.register(require('@fastify/cors'), {
-    origin: 'https://matthew-radio.glitch.me',
+    origin: 'matthew-radio.netlify.app',
     methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['X-Requested-With', 'Content-Type'],
     credentials: true
