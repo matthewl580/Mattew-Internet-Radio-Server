@@ -352,7 +352,7 @@ async function uploadMP3ToFirebase(
     console.error("Error uploading MP3:", error);
   }
 }
-const chunkSize = 1 * 1024 * 1024; // 1 MB chunks
+const chunkSize = 0.25 * 1024 * 1024; // 1/4 MB chunks
 const outputDir = "chunks"; // The output directory
   var chunkMediaDurationArray = [];
 if (!request.body.downloadURL) {
