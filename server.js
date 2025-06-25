@@ -152,6 +152,26 @@ var RadioManager = [
         track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
     },
 },
+    {
+    name: "Motivational Melodies",
+    trackList: ["Happy Rock","Evolution","Cozy Coffee House", "Prism", "Echo of Sadness", "Moonlight Drive","Angels By My Side", "Floating Garden", "Hearty", "Yesterday", "Hope", "Dawn of Change","slowlife" ],
+    trackNum: 0,
+    trackObject: { // Track object specific to this radio station
+        currentSegment: { duration: undefined, position: undefined, SRC: "" },
+        track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
+    },
+},
+    {
+    name: "Background Rock",
+    trackList: ["Imperator", "Atmospheric Guitar", "Rush Metal","Octopus","Extreme Force","Blues In My Socks", "Dusty Rocks", "Freedom Bike","Go On", "Rush","Sunset Strip","Wall of Sound","Cool Rock", "Metal is Trash","Rock Me", "Stadium Rock","Energizer","Rebellion"],
+    trackNum: 0,
+    trackObject: { // Track object specific to this radio station
+        currentSegment: { duration: undefined, position: undefined, SRC: "" },
+        track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
+    },
+},
+    
+    
    
 ];
 
