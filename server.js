@@ -301,6 +301,28 @@ fastify.get("/getAllTrackInformation", function (request, reply) {
     return allTrackInfo;
 });
 
+// Returns a list of all tracks stored in Firestore `Tracks` collection
+// Each item contains: title (doc id), author, duration
+fastify.get("/getAllTracks", async function (request, reply) {
+  try {
+    const snapshot = await db.collection("Tracks").get();
+    const tracks = [];
+    snapshot.forEach(doc => {
+      const data = doc.data() || {};
+      tracks.push({
+        title: doc.id,
+        author: data.author || null,
+        duration: data.duration || null,
+      });
+    });
+    reply.header("Content-Type", "application/json");
+    return tracks;
+  } catch (err) {
+    console.error("🔥 | ERROR - fetching Tracks collection:", err);
+    reply.code(500).send({ error: "Failed to fetch tracks" });
+  }
+});
+
 // Returns track position for *all* radio stations
 fastify.get("/getAllTrackPositions", function (request, reply) {
     const allTrackPositions = {};
