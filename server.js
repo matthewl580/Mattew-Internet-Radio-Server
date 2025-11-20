@@ -382,14 +382,22 @@ console.log("DEBUG: Received editTrackList request:", body);
 
   // Update the in-memory trackList and immediately start playing it from the beginning
   // If playback is running, signal it to stop and trigger the next track to start the new list
+  // If the first song in the new list is the song currently playing, DON'T restart playback.
+  const currentTitle = (radio.trackObject && radio.trackObject.track && radio.trackObject.track.title) || null;
   radio.trackList = newList;
-  // reset index so nextTrack starts at 0
-  radio.trackNum = -1;
-  // signal stop to current playback
-  if (radio._stop) radio._stop();
-  // trigger next track immediately if available
-  if (radio._nextTrack) {
-    try { radio._nextTrack(); } catch (e) { console.error('Error triggering nextTrack:', e); }
+  if (currentTitle && newList.length > 0 && newList[0] === currentTitle) {
+    // Keep playing the current song. Align the trackNum so subsequent nextTrack advances correctly.
+    radio.trackNum = 0;
+    console.log(`ℹ️ | ${radio.name} - Updated trackList but keeping current track playing: ${currentTitle}`);
+  } else {
+    // reset index so nextTrack starts at 0
+    radio.trackNum = -1;
+    // signal stop to current playback
+    if (radio._stop) radio._stop();
+    // trigger next track immediately if available
+    if (radio._nextTrack) {
+      try { radio._nextTrack(); } catch (e) { console.error('Error triggering nextTrack:', e); }
+    }
   }
 
   // Respond with the updated station info
