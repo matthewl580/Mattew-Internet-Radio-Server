@@ -181,13 +181,21 @@ function start() {
 
 
 function playRadioStation(radioStation) {
-  let currentTrackIndex = 0; // Use an index for track management
+  // Use the radio object's trackNum as the authoritative current track index
+  if (typeof radioStation.trackNum !== 'number') radioStation.trackNum = -1;
+  // Flag to indicate immediate stop of current playback
+  radioStation._stopCurrent = false;
 
   function nextTrack(radio) {
-    currentTrackIndex = (currentTrackIndex + 1) % radio.trackList.length; // Wrap around
-    const trackTitle = radio.trackList[currentTrackIndex];
+    if (!Array.isArray(radio.trackList) || radio.trackList.length === 0) {
+      console.warn(`⚠️ | ${radio.name} has empty trackList.`);
+      return;
+    }
 
-    console.log(`⏭️ | ${radio.name} - Playing next track (Track #${currentTrackIndex + 1}): ${trackTitle}`);
+    radio.trackNum = (radio.trackNum + 1) % radio.trackList.length; // Wrap around
+    const trackTitle = radio.trackList[radio.trackNum];
+
+    console.log(`⏭️ | ${radio.name} - Playing next track (Track #${radio.trackNum + 1}): ${trackTitle}`);
 
     radio.trackObject = {  // Reset the ENTIRE trackObject
       currentSegment: { duration: 0, position: 0, SRC: "" },
@@ -203,8 +211,15 @@ function playRadioStation(radioStation) {
       },
     };
 
+    // Clear stop flag when starting a new track
+    radio._stopCurrent = false;
+
     playTrack(radio, trackTitle);
   }
+
+  // Expose nextTrack so external code (admin endpoint) can trigger immediate start
+  radioStation._nextTrack = () => nextTrack(radioStation);
+  radioStation._stop = () => { radioStation._stopCurrent = true; };
 
   async function playTrack(radio, trackTitle) {
     console.log(`🎵 | ${radio.name} - Playing track: ${trackTitle}`);
@@ -222,10 +237,12 @@ function playRadioStation(radioStation) {
       radio.trackObject.track.segmentDurations = trackData.chunksDuration;
 
       await playSegments(radio); // Wait for all segments to play
-      nextTrack(radio); // Go to the next track *after* playSegments completes
+      if (!radio._stopCurrent) {
+        nextTrack(radio); // Go to the next track *after* playSegments completes if not stopped
+      }
     } catch (error) {
       console.error(`🔥 | ERROR - Getting track data: ${error.message}`);
-      nextTrack(radio); // Even on error, proceed to the next track
+      if (!radio._stopCurrent) nextTrack(radio); // Even on error, proceed to the next track
     }
   }
 
@@ -234,6 +251,10 @@ function playRadioStation(radioStation) {
     let currentTrackPosition = 0;
 
     for (let i = 1; i <= radio.trackObject.track.numSegments; i++) {
+      if (radio._stopCurrent) {
+        console.log(`⏹️ | ${radio.name} - Playback stopped mid-track.`);
+        break;
+      }
       try {
         radio.trackObject.currentSegment.duration = Math.trunc(
           radio.trackObject.track.segmentDurations[i - 1]
@@ -278,6 +299,10 @@ function playRadioStation(radioStation) {
 
       // Simulate playback and position tracking (REPLACE THIS WITH ACTUAL AUDIO PLAYBACK LOGIC)
       for (let position = 0; position < segment.duration; position++) {
+        if (radio._stopCurrent) {
+          console.log(`⏹️ | ${radio.name} - Stopping segment playback.`);
+          break;
+        }
         await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate 1-second increments
         radio.trackObject.currentSegment.position = position + 1;
         radio.trackObject.track.position = trackPosition + position + 1; // Update total track position
@@ -285,7 +310,8 @@ function playRadioStation(radioStation) {
       }
   }
 
-  nextTrack(radioStation); // Start the first track
+  // Start the first track
+  nextTrack(radioStation);
 }
 
 
@@ -330,7 +356,7 @@ fastify.post("/admin/editTrackList", function (request, reply) {
   const body = request.body || {};
   const stationName = body.stationName;
   const trackList = body.trackList;
-
+console.log("DEBUG: Received editTrackList request:", body);
   if (!stationName) {
     return reply.code(400).send({ error: "stationName is required" });
   }
@@ -354,8 +380,17 @@ fastify.post("/admin/editTrackList", function (request, reply) {
     return reply.code(400).send({ error: "trackList must be an array of strings or a comma-separated string" });
   }
 
-  // Update the in-memory trackList
+  // Update the in-memory trackList and immediately start playing it from the beginning
+  // If playback is running, signal it to stop and trigger the next track to start the new list
   radio.trackList = newList;
+  // reset index so nextTrack starts at 0
+  radio.trackNum = -1;
+  // signal stop to current playback
+  if (radio._stop) radio._stop();
+  // trigger next track immediately if available
+  if (radio._nextTrack) {
+    try { radio._nextTrack(); } catch (e) { console.error('Error triggering nextTrack:', e); }
+  }
 
   // Respond with the updated station info
   return reply.send({ success: true, station: radio.name, trackList: radio.trackList });
