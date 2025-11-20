@@ -107,73 +107,18 @@ function setDatabaseFile(collection, fileName, data) {
 
 //============================================================= START OF ACTUAL CODE
 
-var RadioManager = [
-    {
-        name: "Radio Wildflower",
-        trackList: ["Inspiration","Cheeky Tuesday","Sweeping Broomstick","Call to Fly","Slow Your Role","Soul of Galveston","Sunday Reflections","The Day is Long","Seventeen", "People Of The Eternal Sun","Another Banger"],
-        trackNum: 0,
-        trackObject: {  // Track object specific to this radio station
-            currentSegment: { duration: undefined, position: undefined, SRC: "" },
-            track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
-        },
-    },
-    {
-      name: "Alarm Hub",
-      trackList: ["Untitled Alarm","Untitled Alarm"],
-      trackNum: 0,
-      trackObject: { // Track object specific to this radio station
-          currentSegment: { duration: undefined, position: undefined, SRC: "" },
-          track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
-      },
+// Load radio stations from JSON so the list is editable and can be expanded
+const radioStationsData = require(path.join(__dirname, 'radioStations.json'));
+
+var RadioManager = radioStationsData.map(rs => ({
+  name: rs.name,
+  trackList: rs.trackList,
+  trackNum: 0,
+  trackObject: { // Track object specific to this radio station
+  currentSegment: { duration: undefined, position: undefined, SRC: "" },
+  track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
   },
-  {
-    name: "Legion Lofi",
-    trackList: ["Wings of Dawn","Call to Fly","Into the Sky","Storm on the Horizon","Engage","Systems Critical","Alone at Altitude","Into the Inferno","Defensive Maneuvers","Burning Sky","Final Descent","The Quiet Below","Eagles and Metal"],
-    trackNum: 0,
-    trackObject: { // Track object specific to this radio station
-        currentSegment: { duration: undefined, position: undefined, SRC: "" },
-        track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
-    },
-  },
-     {
-    name: "Hue Jazz",
-    trackList: ["Don't Say No","Let's Hang","Sista Jane_Jazz Quartet","Slow Your Role","Soul of Galveston","Sunday Reflections","The Day is Long","The Race","Soul of Whicita","Funky Travel Middle","This Casino","It's Nice and I like It"],
-    trackNum: 0,
-    trackObject: { // Track object specific to this radio station
-        currentSegment: { duration: undefined, position: undefined, SRC: "" },
-        track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
-    },
-}, {
-    name: "Meet Mindseye",
-    trackList: ["Mindseye - A Vibe Nostalgic","Mindseye - Atlantic","Mindseye - Atlantic","Mindseye - Echoes","Mindseye - Feel like Home","Mindseye - Intersteller","Mindseye - Leave the Atmosphere","Mindseye - Luminescent","Mindseye - Meliora","Mindseye - Orion","Mindseye - Stratosphere"],
-    trackNum: 0,
-    trackObject: { // Track object specific to this radio station
-        currentSegment: { duration: undefined, position: undefined, SRC: "" },
-        track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
-    },
-},
-    {
-    name: "Motivational Melodies",
-    trackList: ["Happy Rock","Evolution","Cozy Coffee House", "Prism", "Echo of Sadness", "Moonlight Drive","Angels By My Side", "Floating Garden", "Hearty", "Yesterday", "Hope", "Dawn of Change","slowlife" ],
-    trackNum: 0,
-    trackObject: { // Track object specific to this radio station
-        currentSegment: { duration: undefined, position: undefined, SRC: "" },
-        track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
-    },
-},
-    {
-    name: "Background Rock",
-    trackList: ["Imperator", "Atmospheric Guitar", "Rush Metal","Octopus","Extreme Force","Blues In My Socks", "Dusty Rocks", "Freedom Bike","Go On", "Rush","Sunset Strip","Wall of Sound","Cool Rock", "Metal is Trash","Rock Me", "Stadium Rock","Energizer","Rebellion"],
-    trackNum: 0,
-    trackObject: { // Track object specific to this radio station
-        currentSegment: { duration: undefined, position: undefined, SRC: "" },
-        track: { segmentDurations: [], numSegments: undefined, numCurrentSegment: undefined, author: "", title: "", duration: undefined, position: undefined, SRC: "" },
-    },
-},
-    
-    
-   
-];
+}));
 
 function start() {
     RadioManager.forEach(radio => playRadioStation(radio)); // Play all stations simultaneously
@@ -325,6 +270,18 @@ fastify.get("/getAllTrackInformation", function (request, reply) {
         allTrackInfo[radio.name] = radio.trackObject;
     });
     return allTrackInfo;
+});
+
+// Returns names of all radio stations currently being used
+fastify.get('/stations', function (request, reply) {
+  try {
+    const names = RadioManager.map(r => r.name);
+    reply.header('Content-Type', 'application/json');
+    return names;
+  } catch (err) {
+    console.error('🔥 | ERROR - getting stations:', err);
+    reply.code(500).send({ error: 'Failed to fetch stations' });
+  }
 });
 
 // Returns a list of all tracks stored in Firestore `Tracks` collection
