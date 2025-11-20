@@ -323,6 +323,44 @@ fastify.get("/getAllTracks", async function (request, reply) {
   }
 });
 
+// Edit the trackList for a given radio station
+// Protected under /admin so Basic Auth will be required by the existing hook
+// Expects JSON body: { stationName: string, trackList: string[] | string }
+fastify.post("/admin/editTrackList", function (request, reply) {
+  const body = request.body || {};
+  const stationName = body.stationName;
+  const trackList = body.trackList;
+
+  if (!stationName) {
+    return reply.code(400).send({ error: "stationName is required" });
+  }
+  if (!trackList) {
+    return reply.code(400).send({ error: "trackList is required" });
+  }
+
+  // Find the radio station in the in-memory RadioManager
+  const radio = RadioManager.find(r => r.name === stationName);
+  if (!radio) {
+    return reply.code(404).send({ error: "radio station not found" });
+  }
+
+  // Normalize trackList input: accept array of strings or comma-separated string
+  let newList = [];
+  if (Array.isArray(trackList)) {
+    newList = trackList.map(item => String(item).trim()).filter(s => s.length > 0);
+  } else if (typeof trackList === 'string') {
+    newList = trackList.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  } else {
+    return reply.code(400).send({ error: "trackList must be an array of strings or a comma-separated string" });
+  }
+
+  // Update the in-memory trackList
+  radio.trackList = newList;
+
+  // Respond with the updated station info
+  return reply.send({ success: true, station: radio.name, trackList: radio.trackList });
+});
+
 // Returns track position for *all* radio stations
 fastify.get("/getAllTrackPositions", function (request, reply) {
     const allTrackPositions = {};
