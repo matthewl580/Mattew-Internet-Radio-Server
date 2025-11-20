@@ -275,9 +275,9 @@ fastify.get("/getAllTrackInformation", function (request, reply) {
 // Returns names of all radio stations currently being used
 fastify.get('/stations', function (request, reply) {
   try {
-    const names = RadioManager.map(r => r.name);
+    // Return the full contents of radioStations.json (name, description, trackList)
     reply.header('Content-Type', 'application/json');
-    return names;
+    return radioStationsData;
   } catch (err) {
     console.error('🔥 | ERROR - getting stations:', err);
     reply.code(500).send({ error: 'Failed to fetch stations' });
