@@ -164,7 +164,36 @@ function playRadioStation(radioStation) {
 
   // Expose nextTrack so external code (admin endpoint) can trigger immediate start
   radioStation._nextTrack = () => nextTrack(radioStation);
-  radioStation._stop = () => { radioStation._stopCurrent = true; };
+  radioStation._stop = () => {
+    radioStation._stopCurrent = true;
+    // If a cancellable sleep is active, cancel it to stop immediately
+    try {
+      if (radioStation._currentSleepTimer) {
+        clearTimeout(radioStation._currentSleepTimer);
+        radioStation._currentSleepTimer = null;
+      }
+      if (typeof radioStation._currentSleepResolver === 'function') {
+        // Resolve the pending sleep so any awaiting logic continues immediately
+        radioStation._currentSleepResolver();
+        radioStation._currentSleepResolver = null;
+      }
+    } catch (e) {
+      // ignore cancellation errors
+    }
+  };
+
+  // Helper: cancellable sleep that can be aborted by calling radioStation._stop()
+  function cancellableSleep(radio, ms) {
+    return new Promise(resolve => {
+      // store resolver and timer on the radio object so _stop can cancel
+      radio._currentSleepResolver = resolve;
+      radio._currentSleepTimer = setTimeout(() => {
+        radio._currentSleepResolver = null;
+        radio._currentSleepTimer = null;
+        resolve();
+      }, ms);
+    });
+  }
 
   async function playTrack(radio, trackTitle) {
     console.log(`🎵 | ${radio.name} - Playing track: ${trackTitle}`);
@@ -248,7 +277,7 @@ function playRadioStation(radioStation) {
           console.log(`⏹️ | ${radio.name} - Stopping segment playback.`);
           break;
         }
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate 1-second increments
+  await cancellableSleep(radio, 1000); // Simulate 1-second increments with cancellable sleep
         radio.trackObject.currentSegment.position = position + 1;
         radio.trackObject.track.position = trackPosition + position + 1; // Update total track position
         console.log(`${radio.name} - Track Position: ${radio.trackObject.track.position}, Segment Position: ${radio.trackObject.currentSegment.position}`);
